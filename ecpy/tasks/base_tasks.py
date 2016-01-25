@@ -541,7 +541,7 @@ class BaseTask(Atom):
         """Update the database content each time the database entries change.
 
         """
-        if old and self.database:
+        if self.database:
             added = set(new) - set(old)
             removed = set(old) - set(new)
             for entry in removed:
