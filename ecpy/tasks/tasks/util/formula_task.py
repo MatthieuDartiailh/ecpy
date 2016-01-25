@@ -6,10 +6,16 @@
 #
 # The full license is in the file LICENCE, distributed with this software.
 # -----------------------------------------------------------------------------
-"""Task for defining a mathematical formula
-"""
+"""Task for defining mathematical formulas.
 
-from atom.api import (Dict, Unicode, set_default)
+"""
+from __future__ import (division, unicode_literals, print_function,
+                        absolute_import)
+
+from collections import OrderedDict
+from traceback import format_exc
+
+from atom.api import (Typed, set_default)
 
 from ...base_tasks import SimpleTask
 
@@ -19,56 +25,40 @@ class FormulaTask(SimpleTask):
     evaluated and replacement to access to the database data can be used.
     """
     #: List of formulas.
-    # If you want to modify it (Add/remove entry) you must copy, modify and then REASSIGN it
-    formulas = Dict(Unicode()).tag(pref=True)
+    #: To modify it (add/remove entry) the dictionary must be copied, modified
+    #: and then reassigned.
+    formulas = Typed(OrderedDict, ()).tag(pref=True)  # XXXX must use advanced saving here
 
     wait = set_default({'activated': True})  # Wait on all pools by default.
 
     def perform(self):
-        """
-        """
-    #    for i, formula in enumerate(self.formulas):
-    #        value = self.format_and_eval_string(formula[1])
-    #        self.write_in_database(formula[0], value)
+        """Evaluate alll formulas and update the database.
 
-        for key in self.formulas:
-            value = self.format_and_eval_string(self.formulas[key])
-            #self.database_entries[key] = value
-            self.write_in_database(key, value)
+        """
+        for k, v in self.formulas.items():
+            value = self.format_and_eval_string(v)
+            self.write_in_database(k, value)
 
     def check(self, *args, **kwargs):
-        """
+        """Validate that all formulas can be evaluated.
+
         """
         traceback = {}
         test = True
-        for key in self.formulas:
+        for k, v in self.formulas.items():
             try:
-                value = self.format_and_eval_string(self.formulas[key])
-                self.write_in_database(key, value)
-            except Exception as e:
+                value = self.format_and_eval_string(v)
+                self.write_in_database(k, value)
+            except Exception:
                 test = False
-                name = self.path + '/' + self.name + '/' + key
+                name = self.path + '/' + self.name + '-' + k
                 traceback[name] =\
-                    "Failed to eval the formula {}: {}".format(key, e)
+                    "Failed to eval the formula {}: {}".format(k, format_exc())
         return test, traceback
 
-    def prepare(self):
-        ""
-        print(self.formulas)
-        dat = self.database_entries.copy()
-        for key in self.formulas:
-            dat[key] = "1.0"
-        self.database_entries = dat
-        print(self.database_entries)
-
-#    def add_entry(self, key, value):
-#        dict =
-
     def _post_setattr_formulas(self, old, new):
-        """ Observer adding the new definitions to the database.
+        """Observer keeping the database entries in sync with the declared
+        formulas.
 
         """
         self.database_entries = {key: 1.0 for key in new}
-        print("database entries:")
-        print(self.database_entries)
-        print(self.database.go_to_path('root').data)

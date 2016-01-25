@@ -6,7 +6,7 @@
 #
 # The full license is in the file LICENCE, distributed with this software.
 # -----------------------------------------------------------------------------
-"""Test of the Log task.
+"""Test of the Formula task.
 
 """
 from __future__ import (division, unicode_literals, print_function,
@@ -15,17 +15,17 @@ from __future__ import (division, unicode_literals, print_function,
 import pytest
 import enaml
 from multiprocessing import Event
+from collections import OrderedDict
 
 from ecpy.tasks.base_tasks import RootTask
 from ecpy.tasks.tasks.util.formula_task import FormulaTask
 with enaml.imports():
     from ecpy.tasks.tasks.util.views.formula_view import FormulaView
 
-from ecpy.testing.tasks.util import CheckTask
 from ecpy.testing.util import show_and_close_widget
 
 
-class TestSleepTask(object):
+class TestFormulaTask(object):
     """Test LogTask.
 
     """
@@ -39,7 +39,8 @@ class TestSleepTask(object):
         """Test checking that the message value gets written to the database
 
         """
-        self.task.formulas = {'key1': "1.0+3.0", 'key2': '3.0+4.0'}
+        self.task.formulas = OrderedDict([('key1', "1.0+3.0"),
+                                          ('key2', '3.0+4.0')])
         self.root.prepare()
 
         self.task.perform()
