@@ -28,3 +28,7 @@ enamldef UtilTasks(Tasks):
     Task:
         task = 'log_task:LogTask'
         view = 'views.log_view:LogView'
+    Task:
+        task = 'formula_task:FormulaTask'
+        view = 'views.formula_view:FormulaView'
+
